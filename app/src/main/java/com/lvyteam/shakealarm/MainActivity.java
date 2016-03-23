@@ -44,7 +44,22 @@ public class MainActivity extends AppCompatActivity {
         alarmManager=(AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         data =readdata();
         ListView alarmlist=(ListView)findViewById(R.id.alarmlist);
-        adapter =new MyListAdapter(this,data);
+        adapter =new MyListAdapter(this, data, new MyListAdapter.DeleteAlarmListener() {
+            @Override
+            public void DeleteAlarm(int postion) {
+                int id=Integer.valueOf((String) data.get(postion).get("id"));
+                cancelalarm(id);
+                data.remove(postion);
+                adapter.refresh(data);
+                savealarm();
+            }
+        }, new MyListAdapter.CancelAlarmListener() {
+            @Override
+            public void CancelAlarm(int postion) {
+                int id=Integer.valueOf((String) data.get(postion).get("id"));
+                cancelalarm(id);
+            }
+        });
         alarmlist.setAdapter(adapter);
         toolbar.setTitle("shakeAlarm");
         setSupportActionBar(toolbar);
@@ -78,44 +93,57 @@ public class MainActivity extends AppCompatActivity {
        //noinspection SimplifiableIfStatement
         return super.onOptionsItemSelected(item);
     }
+    private void cancelalarm(int id){
+        alarmManager.cancel(PendingIntent.getBroadcast(MainActivity.this, id, new Intent(MainActivity.this, AlarmReceiver.class), 0));
+    }
+
     private void creatalarm(){
         final Calendar calendar=Calendar.getInstance();
         new TimePickerDialog( this, new TimePickerDialog.OnTimeSetListener() {
             int i=0;
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                Calendar calendar1=Calendar.getInstance();
-                calendar1.set(Calendar.HOUR_OF_DAY,hourOfDay);
-                calendar1.set(Calendar.MINUTE,minute);
-                calendar1.set(Calendar.SECOND,0);
+                Calendar calendar1 = Calendar.getInstance();
+                calendar1.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                calendar1.set(Calendar.MINUTE, minute);
+                calendar1.set(Calendar.SECOND, 0);
                 calendar1.set(Calendar.MILLISECOND, 0);
 
                 /*判断是否需要移到下一天*/
-                Calendar calendar2=Calendar.getInstance();
+                Calendar calendar2 = Calendar.getInstance();
 
-                if(calendar1.getTimeInMillis()<=calendar2.getTimeInMillis()){
-                    calendar1.setTimeInMillis(calendar1.getTimeInMillis()+24*60*60*1000);
+                if (calendar1.getTimeInMillis() <= calendar2.getTimeInMillis()) {
+                    calendar1.setTimeInMillis(calendar1.getTimeInMillis() + 24 * 60 * 60 * 1000);
                 }
-//                alarmManager.set(AlarmManager.RTC_WAKEUP,
-//                        calendar1.getTimeInMillis(),PendingIntent.getBroadcast(MainActivity.this, adapter.getid(calendar1.getTimeInMillis()), new Intent(MainActivity.this, AlarmReceiver.class), 0));
+                int id = (int) calendar1.getTimeInMillis() / 60 / 1000;
+                alarmManager.set(AlarmManager.RTC_WAKEUP,
+                        calendar1.getTimeInMillis(), PendingIntent.getBroadcast(MainActivity.this, id, new Intent(MainActivity.this, AlarmReceiver.class), 0));
 
-                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                        calendar1.getTimeInMillis(),
-                        5 * 60 * 1000,
-                        PendingIntent.getBroadcast(MainActivity.this, 4512, new Intent(MainActivity.this, AlarmReceiver.class), 0));
+//                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+//                        calendar1.getTimeInMillis(),
+//                        5 * 60 * 1000,
+//                        PendingIntent.getBroadcast(MainActivity.this, 4512, new Intent(MainActivity.this, AlarmReceiver.class), 0));
                 Calendar date = Calendar.getInstance();
                 date.setTimeInMillis(calendar1.getTimeInMillis());
-                String  timeLabel = String.format(" %d:%d",
 
-                        date.get(Calendar.HOUR_OF_DAY),
-                        date.get(Calendar.MINUTE));
+              String minute2="";
+                if (date.get(Calendar.MINUTE) < 10) {
+                    minute2 = "0" + String.valueOf(date.get(Calendar.MINUTE));
+                }
+                else {
+                    minute2= String.valueOf(date.get(Calendar.MINUTE));
+                }
+                String timeLabel = String.valueOf(date.get(Calendar.HOUR_OF_DAY))+":"+minute2;
 
-                Map<String, Object> map=new HashMap<String, Object>();
+                Map<String, Object> map = new HashMap<String, Object>();
                 i++;
-                if(i==1){
+                if (i == 1) {
+                    String id2=String.valueOf(id);
+
                     map.put("title", timeLabel);
                     map.put("check", true);
-                    System.out.println("111111111111111");
+                    map.put("id", id2);
+
                     data.add(map);
                     adapter.refresh(data);
                     savealarm();
@@ -136,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor =this.getSharedPreferences(MainActivity.class.getName(), Context.MODE_PRIVATE).edit();
         StringBuffer sb=new StringBuffer();
         for(int i=0;i<data.size();i++){
-            sb.append(data.get(i).get("title")).append(",").append(data.get(i).get("check")).append(",");
+            sb.append(data.get(i).get("title")).append(",").append(data.get(i).get("check")).append(",").append(data.get(i).get("id")).append(",");
 
         }
         if (sb.length()>1) {
@@ -158,10 +186,11 @@ public class MainActivity extends AppCompatActivity {
 //            for(int i=0;i<contentstring.length;i++){
 //                Log.d("shijian",contentstring[i]);
 //            }
-            for(int i=0;i<contentstring.length;i=i+2){
+            for(int i=0;i<contentstring.length;i=i+3){
                 Map<String, Object> map=new HashMap<String, Object>();
             map.put("title",contentstring[i]);
             map.put("check",Boolean.valueOf(contentstring[i+1]));
+            map.put("id",contentstring[i+2]);
             data2.add(map);
         }
         }

@@ -1,6 +1,7 @@
 package com.lvyteam.shakealarm;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
@@ -26,9 +27,20 @@ public class MyListAdapter extends BaseAdapter {
     private LayoutInflater layoutInflater;
     private Context context;
     private  long time;
+    private  DeleteAlarmListener deleteAlarmListener;
+    private  CancelAlarmListener cancelAlarmListener;
 
+ public interface  DeleteAlarmListener{
+       public void DeleteAlarm(int postion);
+    }
+    public  interface CancelAlarmListener{
+        public  void CancelAlarm(int postion);
 
-    public MyListAdapter(Context context, List<Map<String, Object>> data){
+    }
+
+    public MyListAdapter(Context context, List<Map<String, Object>> data,DeleteAlarmListener deleteAlarmListener,CancelAlarmListener cancelAlarmListener){
+        this.deleteAlarmListener=deleteAlarmListener;
+        this.cancelAlarmListener=cancelAlarmListener;
         this.context=context;
         this.data=data;
         this.layoutInflater=LayoutInflater.from(context);
@@ -41,7 +53,7 @@ public class MyListAdapter extends BaseAdapter {
 
     }
 
-    
+
     /*组件*/
     public final  class Parts {
         public Switch sw;
@@ -51,13 +63,9 @@ public class MyListAdapter extends BaseAdapter {
     public void settime(long time){
         this.time =time;
     }
-    public void remove(int postion){
-        this.data.remove(postion);
-        notifyDataSetChanged();
-    }
-    public  int getId(){
 
-        return (int)time/1000/60;
+    public List<Map<String,Object>> getdata(){
+        return this.data;
     }
     @Override
     public int getCount() {
@@ -89,6 +97,8 @@ public class MyListAdapter extends BaseAdapter {
                    if (isChecked) {
                        //开启闹钟
                    } else {
+
+                       cancelAlarmListener.CancelAlarm(position);
                      //取消闹钟
                    }
                }
@@ -104,8 +114,9 @@ public class MyListAdapter extends BaseAdapter {
 
                             switch (which) {
                                 case 0:
+                                    deleteAlarmListener.DeleteAlarm(position);
 
-                                    remove(position);
+
 
 
 

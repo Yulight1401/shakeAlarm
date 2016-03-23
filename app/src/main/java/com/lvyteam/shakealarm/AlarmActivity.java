@@ -1,7 +1,11 @@
 package com.lvyteam.shakealarm;
 
+import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.KeyguardManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,14 +20,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import java.util.Calendar;
 
 public class AlarmActivity extends AppCompatActivity {
     private SensorManager sensorManager;
     private Vibrator vibrator;
-    private static final String TAG = "TestSensorActivity";
+
     private static final int SENSOR_SHAKE = 10;
     private Button btn_delay;
-
+    private AlarmManager alarmManager;
     private  MediaPlayer mediaPlayer;
     private PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
@@ -37,15 +44,31 @@ public class AlarmActivity extends AppCompatActivity {
         shaking();
         lighting();
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-
-
+        final Calendar calendar=Calendar.getInstance();
+        alarmManager=(AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        TextView textView=(TextView)findViewById(R.id.alarmtime);
+        String minute2="";
+        if (calendar.get(Calendar.MINUTE) < 10) {
+            minute2 = "0" + String.valueOf(calendar.get(Calendar.MINUTE));
+        }
+        else {
+            minute2= String.valueOf(calendar.get(Calendar.MINUTE));
+        }
+        String timeLabel = String.valueOf(calendar.get(Calendar.HOUR_OF_DAY))+":"+minute2;
+        textView.setText(timeLabel);
         btn_delay=(Button)findViewById(R.id.btn_delay);
 
         btn_delay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                        calendar.getTimeInMillis()+5 * 60 * 1000,
+                        5 * 60 * 1000,
+                        PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
+                ((ActivityManager)getSystemService(Context.ACTIVITY_SERVICE)).restartPackage(getPackageName());
                 finish();
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(0);
 
             }
         });
@@ -55,6 +78,7 @@ public class AlarmActivity extends AppCompatActivity {
     protected  void lighting(){
         powerManager =(PowerManager)getSystemService(POWER_SERVICE);
         km=(KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+
         KeyguardManager.KeyguardLock kmlock=km.newKeyguardLock("unlock");
         kmlock.disableKeyguard();
         wakeLock=powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP|PowerManager.SCREEN_DIM_WAKE_LOCK,"SimpleTimer");
@@ -131,9 +155,11 @@ public class AlarmActivity extends AppCompatActivity {
             switch (msg.what) {
                 case SENSOR_SHAKE:
 
+                    alarmManager.cancel(PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
+                    ((ActivityManager)getSystemService(Context.ACTIVITY_SERVICE)).restartPackage(getPackageName());
                     finish();
-//                    Toast.makeText(TestSensorActivity.this, "检测到摇晃，执行操作！", Toast.LENGTH_SHORT).show();
-//                    Log.i(TAG, "检测到摇晃，执行操作！");
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                    System.exit(0);
                     break;
             }
         }
