@@ -52,16 +52,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void SetAlarm(final int postion) {
 
-                final AlarmSetDialog alarmSetDialog =new AlarmSetDialog(MainActivity.this, R.style.AlarmsetDialog, new AlarmSetDialog.SetRepeatListener() {
+                AlarmSetDialog alarmSetDialog =new AlarmSetDialog(MainActivity.this, R.style.AlarmsetDialog, new AlarmSetDialog.SetRepeatListener() {
                     @Override
                     public void setrepeat(Map<String, Object> data) {
 //                        int postion= (int) data.get("postion");
                         SharedPreferences sp = getSharedPreferences(MainActivity.class.getName(), Context.MODE_PRIVATE);
                         String getcontent = sp.getString(String.valueOf(postion) + "repeat", null);
-                        Map<String, Object> map2 = new HashMap<String, Object>();
                         if (getcontent == null) {
                             for (int i = 0; i < 7; i++) {
-                                map2.put("day" + String.valueOf(i), false);
 
                             }
                         } else {
@@ -80,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                             editor.putString(String.valueOf(postion) + "repeat", content);
 
                         } else {
-                            editor.putString(String.valueOf(postion) + "repeat", null);
+                            editor.putString("alarmlist", null);
                         }
                         editor.commit();
 
@@ -99,11 +97,19 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void everyday(int postion) {
                         int id = Integer.valueOf((String) data.get(postion).get("id"));
-                        Calendar calendar1 = Calendar.getInstance();
+                        String time= (String) data.get(postion).get("title");
+                        String [] content =time.split(":");
+                        int hour=Integer.valueOf(content[0]);
+                        int minnute=Integer.valueOf(content[1]);
+                        Calendar calendar1=Calendar.getInstance();
+                        calendar1.set(Calendar.HOUR_OF_DAY, hour);
+                        calendar1.set(Calendar.MINUTE, minnute);
+                        calendar1.set(Calendar.SECOND, 0);
+                        calendar1.set(Calendar.MILLISECOND, 0);
                         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                         calendar1.getTimeInMillis(),
                         AlarmManager.INTERVAL_DAY,
-                        PendingIntent.getBroadcast(MainActivity.this, 4512, new Intent(MainActivity.this, AlarmReceiver.class), 0));
+                        PendingIntent.getBroadcast(MainActivity.this, id, new Intent(MainActivity.this, AlarmReceiver.class), 0));
                     }
                 },postion);
                 alarmSetDialog.show();
@@ -203,10 +209,10 @@ public class MainActivity extends AppCompatActivity {
                 String hour="";
 
                 if (calendar.get(Calendar.HOUR_OF_DAY) < 10) {
-                    hour = "0" + String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+                    hour = "0" + String.valueOf(date.get(Calendar.HOUR_OF_DAY));
                 }
                 else {
-                    hour= String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+                    hour= String.valueOf(date.get(Calendar.HOUR_OF_DAY));
                 }
                 String minute2="";
                 if (date.get(Calendar.MINUTE) < 10) {
@@ -266,10 +272,10 @@ public class MainActivity extends AppCompatActivity {
                 String hour="";
 
                 if (calendar.get(Calendar.HOUR_OF_DAY) < 10) {
-                    hour = "0" + String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+                    hour = "0" + String.valueOf(date.get(Calendar.HOUR_OF_DAY));
                 }
                 else {
-                    hour= String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+                    hour= String.valueOf(date.get(Calendar.HOUR_OF_DAY));
                 }
               String minute2="";
                 if (date.get(Calendar.MINUTE) < 10) {

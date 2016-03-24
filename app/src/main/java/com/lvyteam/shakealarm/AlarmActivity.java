@@ -50,7 +50,7 @@ public class AlarmActivity extends AppCompatActivity  {
         playmusic();
         shaking();
         lighting();
-        notificate();
+
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         final Calendar calendar=Calendar.getInstance();
@@ -96,6 +96,7 @@ public class AlarmActivity extends AppCompatActivity  {
                         calendar.getTimeInMillis()+5 * 60 * 1000,
                         5 * 60 * 1000,
                         PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
+                notificate();
                 ((ActivityManager)getSystemService(Context.ACTIVITY_SERVICE)).restartPackage(getPackageName());
                 finish();
                 android.os.Process.killProcess(android.os.Process.myPid());
@@ -121,7 +122,7 @@ public class AlarmActivity extends AppCompatActivity  {
         notificationmanager =(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         PendingIntent pendingIntent =PendingIntent.getBroadcast(AlarmActivity.this,1101,new Intent(AlarmActivity.this,NotificationReciver.class),0);
         NotificationCompat.Builder builder =new NotificationCompat.Builder(AlarmActivity.this);
-        builder.setContentTitle("Alarm").setSmallIcon(R.drawable.notification_template_icon_bg).setContentText("Touch to restart 5 minutes later").setTicker("Alarm").setAutoCancel(true).setContentIntent(pendingIntent);
+        builder.setContentTitle("Alarm").setSmallIcon(R.drawable.notification_template_icon_bg).setContentText("Touch to STOP restart 5 minutes later").setTicker("Alarm").setAutoCancel(true).setContentIntent(pendingIntent);
 
         notificationmanager.notify(1101,builder.build());
     }

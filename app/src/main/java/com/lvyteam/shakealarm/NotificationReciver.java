@@ -25,10 +25,11 @@ public class NotificationReciver extends BroadcastReceiver {
         // TODO: This method is called when the BroadcastReceiver is receiving
         // an Intent broadcast.
         final Calendar calendar=Calendar.getInstance();
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis() + 5 * 60 * 1000,
-                5 * 60 * 1000,
-                PendingIntent.getBroadcast(context, 4512, new Intent(context, AlarmReceiver.class), 0));
+        alarmManager.cancel(PendingIntent.getBroadcast(context, 4512, new Intent(context, AlarmReceiver.class), 0));
+//        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+//                calendar.getTimeInMillis() + 5 * 60 * 1000,
+//                5 * 60 * 1000,
+//                PendingIntent.getBroadcast(context, 4512, new Intent(context, AlarmReceiver.class), 0));
               //  killActivityListener.killactivity();
 
 
