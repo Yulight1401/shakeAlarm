@@ -54,7 +54,7 @@ public class AlarmActivity extends AppCompatActivity  {
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         final Calendar calendar=Calendar.getInstance();
-        alarmManager=(AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+
 
         TextView textViewshake=(TextView)findViewById(R.id.shaketitle);
         AnimationSet animationSet=new AnimationSet(true);
@@ -91,9 +91,10 @@ public class AlarmActivity extends AppCompatActivity  {
         btn_delay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                notificationmanager.cancel(1101);
+
+                alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
                 alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                        calendar.getTimeInMillis()+5 * 60 * 1000,
+                        calendar.getTimeInMillis() + 5 * 60 * 1000,
                         5 * 60 * 1000,
                         PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
                 notificate();
@@ -112,6 +113,7 @@ public class AlarmActivity extends AppCompatActivity  {
             @Override
             public void killactivity() {
                 notificationmanager.cancel(1101);
+                alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
                 alarmManager.cancel(PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
                 ((ActivityManager)getSystemService(Context.ACTIVITY_SERVICE)).restartPackage(getPackageName());
                 finish();
