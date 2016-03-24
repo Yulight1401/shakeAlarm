@@ -209,7 +209,7 @@ public class AlarmActivity extends AppCompatActivity  {
             switch (msg.what) {
                 case SENSOR_SHAKE:
 
-                    notificationmanager.cancel(1101);
+                   
                     alarmManager.cancel(PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
                     ((ActivityManager)getSystemService(Context.ACTIVITY_SERVICE)).restartPackage(getPackageName());
                     finish();
