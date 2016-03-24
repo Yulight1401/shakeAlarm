@@ -17,6 +17,7 @@ import android.widget.TextView;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Created by 亮 on 2016/3/21.
@@ -27,19 +28,24 @@ public class MyListAdapter extends BaseAdapter {
     private LayoutInflater layoutInflater;
     private Context context;
     private  long time;
-    private  DeleteAlarmListener deleteAlarmListener;
+    private SetAlarmListener setAlarmListener;
     private  CancelAlarmListener cancelAlarmListener;
+    private  ChangeTimeListener changeTimeListener;
 
- public interface  DeleteAlarmListener{
-       public void DeleteAlarm(int postion);
+    public  interface  ChangeTimeListener{
+        public void ChangeTime(int postion);
+    }
+ public interface  SetAlarmListener{
+       public void SetAlarm(int postion);
     }
     public  interface CancelAlarmListener{
         public  void CancelAlarm(int postion);
 
     }
 
-    public MyListAdapter(Context context, List<Map<String, Object>> data,DeleteAlarmListener deleteAlarmListener,CancelAlarmListener cancelAlarmListener){
-        this.deleteAlarmListener=deleteAlarmListener;
+    public MyListAdapter(Context context, List<Map<String, Object>> data,SetAlarmListener setAlarmListener,CancelAlarmListener cancelAlarmListener,ChangeTimeListener changeTimeListener){
+        this.setAlarmListener=setAlarmListener;
+        this.changeTimeListener=changeTimeListener;
         this.cancelAlarmListener=cancelAlarmListener;
         this.context=context;
         this.data=data;
@@ -99,34 +105,36 @@ public class MyListAdapter extends BaseAdapter {
                    } else {
 
                        cancelAlarmListener.CancelAlarm(position);
-                     //取消闹钟
+                       //取消闹钟
                    }
                }
            });
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    changeTimeListener.ChangeTime(position);
+                }
+            });
+
             convertView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
+                    setAlarmListener.SetAlarm(position);
                     Log.d("positon::::::::",String.valueOf(position));
-                    new AlertDialog.Builder(context).setItems(new CharSequence[]{"删除"}, new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            switch (which) {
-                                case 0:
-                                    deleteAlarmListener.DeleteAlarm(position);
-
-
-
-
-
-                                    break;
-                                default:
-                                    break;
-                            }
-
-                        }
-                    }).setNegativeButton("取消", null).show();
+//                    new AlertDialog.Builder(context).setItems(new CharSequence[]{"删除"}, new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//
+//                            switch (which) {
+//                                case 0:
+//
+//                                    break;
+//                                default:
+//                                    break;
+//                            }
+//
+//                        }
+//                    }).setNegativeButton("取消", null).show();
                     return true;
                 }
             });

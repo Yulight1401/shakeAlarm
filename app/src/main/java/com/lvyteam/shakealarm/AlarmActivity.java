@@ -3,6 +3,7 @@ package com.lvyteam.shakealarm;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.KeyguardManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -16,23 +17,29 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Vibrator;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.Calendar;
 
-public class AlarmActivity extends AppCompatActivity {
+public class AlarmActivity extends AppCompatActivity  {
     private SensorManager sensorManager;
     private Vibrator vibrator;
-
+    private NotificationManager notificationmanager;
     private static final int SENSOR_SHAKE = 10;
     private Button btn_delay;
     private AlarmManager alarmManager;
     private  MediaPlayer mediaPlayer;
     private PowerManager powerManager;
+
     PowerManager.WakeLock wakeLock;
     KeyguardManager km;
 
@@ -43,24 +50,48 @@ public class AlarmActivity extends AppCompatActivity {
         playmusic();
         shaking();
         lighting();
+        notificate();
+
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         final Calendar calendar=Calendar.getInstance();
         alarmManager=(AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+
+        TextView textViewshake=(TextView)findViewById(R.id.shaketitle);
+        AnimationSet animationSet=new AnimationSet(true);
+        TranslateAnimation translateAnimation=new TranslateAnimation(Animation.RELATIVE_TO_SELF,-0.2f,Animation.RELATIVE_TO_SELF,0.2f,Animation.RELATIVE_TO_SELF,0f,Animation.RELATIVE_TO_SELF,0f);
+
+        translateAnimation.setRepeatCount(20);
+        translateAnimation.setDuration(1000);
+        animationSet.addAnimation(translateAnimation);
+
+        textViewshake.startAnimation(animationSet);
+
+
+
         TextView textView=(TextView)findViewById(R.id.alarmtime);
+        String hour="";
         String minute2="";
+        if (calendar.get(Calendar.HOUR_OF_DAY) < 10) {
+            hour = "0" + String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+        }
+        else {
+            hour= String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+        }
         if (calendar.get(Calendar.MINUTE) < 10) {
             minute2 = "0" + String.valueOf(calendar.get(Calendar.MINUTE));
         }
         else {
             minute2= String.valueOf(calendar.get(Calendar.MINUTE));
         }
-        String timeLabel = String.valueOf(calendar.get(Calendar.HOUR_OF_DAY))+":"+minute2;
+        String timeLabel = hour+":"+minute2;
         textView.setText(timeLabel);
+
         btn_delay=(Button)findViewById(R.id.btn_delay);
 
         btn_delay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                notificationmanager.cancel(1101);
                 alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                         calendar.getTimeInMillis()+5 * 60 * 1000,
                         5 * 60 * 1000,
@@ -73,6 +104,26 @@ public class AlarmActivity extends AppCompatActivity {
             }
         });
 
+    }
+    protected  void notificate(){
+        NotificationReciver notificationReciver=new NotificationReciver();
+        notificationReciver.setListener(new NotificationReciver.KillActivityListener() {
+            @Override
+            public void killactivity() {
+                notificationmanager.cancel(1101);
+                alarmManager.cancel(PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
+                ((ActivityManager)getSystemService(Context.ACTIVITY_SERVICE)).restartPackage(getPackageName());
+                finish();
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(0);
+            }
+        });
+        notificationmanager =(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        PendingIntent pendingIntent =PendingIntent.getBroadcast(AlarmActivity.this,1101,new Intent(AlarmActivity.this,NotificationReciver.class),0);
+        NotificationCompat.Builder builder =new NotificationCompat.Builder(AlarmActivity.this);
+        builder.setContentTitle("Alarm").setSmallIcon(R.drawable.notification_template_icon_bg).setContentText("Touch to restart 5 minutes later").setTicker("Alarm").setAutoCancel(true).setContentIntent(pendingIntent);
+
+        notificationmanager.notify(1101,builder.build());
     }
 
     protected  void lighting(){
@@ -155,6 +206,7 @@ public class AlarmActivity extends AppCompatActivity {
             switch (msg.what) {
                 case SENSOR_SHAKE:
 
+                    notificationmanager.cancel(1101);
                     alarmManager.cancel(PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
                     ((ActivityManager)getSystemService(Context.ACTIVITY_SERVICE)).restartPackage(getPackageName());
                     finish();

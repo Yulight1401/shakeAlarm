@@ -28,9 +28,10 @@
                 android:id="@+id/alarmtime"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="Time"
+
                 android:layout_height="wrap_content" />
             <TextView
+                android:id="@+id/shaketitle"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
                 android:textColor="@color/abc_primary_text_disable_only_material_dark"
@@ -44,7 +45,7 @@
 
         <LinearLayout
             android:layout_weight="2"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             >
@@ -62,7 +63,16 @@
 
                 android:background="@drawable/abc_btn_borderless_material"
                 android:text="延后" />
+            <TextView
 
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:textColor="@color/abc_primary_text_disable_only_material_dark"
+                android:textSize="12dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content"
+                android:text="5分钟后再次响铃"/>
 
         </LinearLayout>
     </LinearLayout>
