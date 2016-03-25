@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                         calendar1.set(Calendar.SECOND, 0);
                         calendar1.set(Calendar.MILLISECOND, 0);
                         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                        calendar1.getTimeInMillis(),
+                        calendar1.getTimeInMillis()+AlarmManager.INTERVAL_DAY,
                         AlarmManager.INTERVAL_DAY,
                         PendingIntent.getBroadcast(MainActivity.this, id, new Intent(MainActivity.this, AlarmReceiver.class), 0));
                     }

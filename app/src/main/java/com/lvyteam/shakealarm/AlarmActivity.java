@@ -152,6 +152,7 @@ public class AlarmActivity extends AppCompatActivity  {
     protected void onDestroy() {
         wakeLock.release();
         vibrator.cancel();
+
         mediaPlayer.stop();
         mediaPlayer.release();
         super.onDestroy();
@@ -209,7 +210,7 @@ public class AlarmActivity extends AppCompatActivity  {
             switch (msg.what) {
                 case SENSOR_SHAKE:
 
-                   
+                    alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
                     alarmManager.cancel(PendingIntent.getBroadcast(AlarmActivity.this, 4512, new Intent(AlarmActivity.this, AlarmReceiver.class), 0));
                     ((ActivityManager)getSystemService(Context.ACTIVITY_SERVICE)).restartPackage(getPackageName());
                     finish();
